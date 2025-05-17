@@ -25,7 +25,6 @@
         border-radius: 24px;
         border: 1px #b69c17 solid;
         overflow: hidden;
-        
         position: relative;
         width: 100%;
         height: auto;
@@ -58,6 +57,84 @@
         font-weight: 700;
         line-height: 1.5;
       }
+
+      /* 댓글 섹션 스타일 */
+      .comment-section {
+        max-width: 390px;
+        margin: 20px auto 40px;
+        font-family: "JetBrains Mono", monospace;
+        display: flex;
+        flex-direction: column;
+      }
+
+      #commentsList {
+        max-height: 300px;
+        overflow-y: auto;
+        margin-bottom: 20px;
+        border: 1px solid #ccc;
+        border-radius: 12px;
+        padding: 10px;
+        background: #fff;
+      }
+
+      #commentsList > div {
+        border-bottom: 1px solid #eee;
+        padding: 8px 0;
+        white-space: pre-wrap;
+      }
+
+      #commentsList > div:last-child {
+        border-bottom: none;
+      }
+
+      .comment-user {
+        font-weight: 700;
+        margin-bottom: 4px;
+        color: #5a4d00;
+      }
+
+      #commentForm {
+        display: flex;
+        flex-direction: column;
+      }
+
+      #usernameInput {
+        margin-bottom: 8px;
+        padding: 8px;
+        font-family: inherit;
+        font-size: 14px;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+        box-sizing: border-box;
+      }
+
+      #commentInput {
+        width: 100%;
+        font-family: inherit;
+        font-size: 14px;
+        padding: 8px;
+        box-sizing: border-box;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+        resize: vertical;
+        margin-bottom: 8px;
+      }
+
+      button {
+        align-self: flex-start;
+        padding: 6px 12px;
+        font-family: inherit;
+        font-weight: 700;
+        background: #efd036;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background 0.3s ease;
+      }
+
+      button:hover {
+        background: #d4b815;
+      }
     </style>
   </head>
   <body>
@@ -68,12 +145,97 @@
       <div class="text-box">
         <h2>북대구초등학교 6학년 김서윤</h2>
         <p>
-          처음에는 보육원에서 아이들을 돕는게 그냥 봉사라고 생각했어요.<br/><br/>
-          하지만 지금은 제가 받은 사랑을 아이들과 나누고 싶다는 마음이 생겼어요.<br/><br/>
-          모든 사람은 똑같이 소중하다고 생각하기 때문에,<br/>
+          처음에는 보육원에서 아이들을 돕는게 그냥 봉사라고 생각했어요.<br /><br />
+          하지만 지금은 제가 받은 사랑을 아이들과 나누고 싶다는 마음이 생겼어요.<br /><br />
+          모든 사람은 똑같이 소중하다고 생각하기 때문에,<br />
           아이들이 더 많이 존중받도록 도와주고 싶어서 이 일을 꿈으로 정하게 되었어요!
         </p>
       </div>
     </div>
+
+    <!-- 댓글 섹션 시작 -->
+    <div class="comment-section">
+      <div id="commentsList"></div>
+
+      <form id="commentForm">
+        <input
+          type="text"
+          id="usernameInput"
+          placeholder="사용자 이름을 입력하세요"
+          maxlength="20"
+          required
+        />
+        <textarea
+          id="commentInput"
+          rows="4"
+          placeholder="댓글을 입력하세요..."
+          required
+        ></textarea>
+        <button type="submit">댓글 작성</button>
+      </form>
+    </div>
+
+    <script>
+      const commentForm = document.getElementById("commentForm");
+      const usernameInput = document.getElementById("usernameInput");
+      const commentInput = document.getElementById("commentInput");
+      const commentsList = document.getElementById("commentsList");
+
+      // 로컬스토리지에서 댓글 불러오기
+      function loadComments() {
+        const savedComments = JSON.parse(localStorage.getItem("comments") || "[]");
+        savedComments.forEach(({ user, text }) => {
+          addCommentToDOM(user, text);
+        });
+      }
+
+      // 댓글을 DOM에 추가하는 함수
+      function addCommentToDOM(user, text) {
+        const commentEl = document.createElement("div");
+
+        const userEl = document.createElement("div");
+        userEl.className = "comment-user";
+        userEl.textContent = user;
+
+        const textEl = document.createElement("div");
+        textEl.textContent = text;
+
+        commentEl.appendChild(userEl);
+        commentEl.appendChild(textEl);
+
+        commentsList.appendChild(commentEl);
+      }
+
+      // 댓글 저장 (로컬스토리지)
+      function saveComment(user, text) {
+        const savedComments = JSON.parse(localStorage.getItem("comments") || "[]");
+        savedComments.push({ user, text });
+        localStorage.setItem("comments", JSON.stringify(savedComments));
+      }
+
+      commentForm.addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        const user = usernameInput.value.trim();
+        const text = commentInput.value.trim();
+
+        if (!user) {
+          alert("사용자 이름을 입력해주세요.");
+          return;
+        }
+        if (!text) {
+          alert("댓글을 입력해주세요.");
+          return;
+        }
+
+        addCommentToDOM(user, text);
+        saveComment(user, text);
+
+        commentInput.value = "";
+      });
+
+      // 페이지 로드 시 댓글 불러오기
+      window.onload = loadComments;
+    </script>
   </body>
 </html>
